@@ -18,7 +18,7 @@ public class ImageChangerThread extends Thread {
                 if (imgChanger != null) {
                     setIcon();
                     imgChanger.changeImage(imageString);
-                    Thread.sleep(10000);
+                    Thread.sleep(7500);
                 }
             }
         } catch (Exception e) {

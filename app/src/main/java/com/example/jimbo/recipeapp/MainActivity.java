@@ -1,6 +1,7 @@
 package com.example.jimbo.recipeapp;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -10,7 +11,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,15 +25,25 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements ImageChanger{
     private EditText editText;
     private TextView infoText;
     private ProgressDialog pd;
+    ArrayList<HashMap<String, String>> recipeList = new ArrayList<HashMap<String, String>>();
+
+    ArrayList<String> titleList = new ArrayList<String>();
+    ArrayList<String> imageUrlList = new ArrayList<String>();
+    ArrayList<String> recipeUrlList = new ArrayList<String>();
+
+    String TAG_TITLE = "title";
+    String TAG_IMAGE_RUL = "image_url";
+    String TAG_RECIPE_URL = "source_url";
 
     //Using an api called food2fork https://www.food2fork.com/about/api
-    private String API_KEY = "fd22eec9b203cd2d912c40c118c5cc49";
-    private String url;
+    final private String API_KEY = "fd22eec9b203cd2d912c40c118c5cc49";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +59,58 @@ public class MainActivity extends AppCompatActivity implements ImageChanger{
     }
 
     protected void fetchButtonClicked(View v) {
-        String userInput = editText.getText().toString();
-        url = "https://www.food2fork.com/api/search?key=" + API_KEY + "&q=" + userInput;
-        new JsonTask().execute(url);
+        if(!editText.getText().toString().equals("")) {
+            String url = "https://www.food2fork.com/api/search?key=" + API_KEY + "&q=" + editText.getText().toString();
+            new JsonTask().execute(url);
+        }
+    }
+
+    @Override
+    public void changeImage(final String imageString) {
+        MainActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ImageView imageView = findViewById(R.id.imageView);
+                Resources res = getResources();
+                int resID = res.getIdentifier(imageString , "drawable", getPackageName());
+                imageView.setImageResource(resID);
+            }
+        });
+    }
+
+    public void proceedToRecipes(String result) {
+        try {
+            JSONObject jObject = new JSONObject(result);
+            String countOfRecipes = jObject.getString("count");
+            Log.d("recipes", countOfRecipes);
+            JSONArray jArray = jObject.getJSONArray("recipes");
+
+            // looping through All objects.
+            for (int i = 0; i < jArray.length(); i++) {
+                JSONObject c = jArray.getJSONObject(i);
+
+                // Storing each json item in variable
+                String title = c.getString(TAG_TITLE);
+                String imageUrl = c.getString(TAG_IMAGE_RUL);
+                String recipeUrl = c.getString(TAG_RECIPE_URL);
+
+                Log.d("title", title);
+                Log.d("imageUrl", imageUrl);
+                Log.d("recipeUrl", recipeUrl);
+
+                titleList.add(title);
+                imageUrlList.add(imageUrl);
+                recipeUrlList.add(recipeUrl);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        // Go to recipeView.
+        Intent in = new Intent(getApplicationContext(), RecipeView.class);
+        in.putExtra("titleList", titleList);
+        in.putExtra("imageUrlList", imageUrlList);
+        in.putExtra("recipeUrlList", recipeUrlList);
+        startActivity(in);
     }
 
     private class JsonTask extends AsyncTask<String, String, String> {
@@ -107,26 +172,9 @@ public class MainActivity extends AppCompatActivity implements ImageChanger{
             if (pd.isShowing()){
                 pd.dismiss();
             }
-            infoText.setText(result);
+            //infoText.setText(result);
+            editText.setText("");
             proceedToRecipes(result);
         }
-    }
-
-    @Override
-    public void changeImage(final String imageString) {
-        MainActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ImageView imageView = findViewById(R.id.imageView);
-                Resources res = getResources();
-                int resID = res.getIdentifier(imageString , "drawable", getPackageName());
-                imageView.setImageResource(resID);
-            }
-        });
-    }
-
-    public void proceedToRecipes(String result) {
-        //Here we go to the next intent.
-        Log.d("recipes",result);
     }
 }

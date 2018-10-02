@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:ems="12"
         android:paddingTop="60dp"
-        android:hint="What do you want to cook?"
+        android:hint="What would you like to cook?"
         android:inputType="textPersonName" />
 
     <Button
@@ -30,7 +30,7 @@
         android:onClick="fetchButtonClicked"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Fetch me the Recipe!" />
+        android:text="Fetch me the Recipes!" />
 
     <TextView
         android:id="@+id/infoText"
