@@ -1,7 +1,5 @@
 package com.example.jimbo.recipeapp;
 
-import android.util.Log;
-
 import java.util.Random;
 
 public class ImageChangerThread extends Thread {

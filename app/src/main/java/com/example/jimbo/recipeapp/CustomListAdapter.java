@@ -8,21 +8,25 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+
 public class CustomListAdapter extends ArrayAdapter<String> {
 
     private final Activity context;
     private final String[] itemname;
     private final String[] linkName;
-    private final Integer[] imgid;
+    private final String[] publishers;
+    private final ArrayList<String> imgArray;
 
-    public CustomListAdapter(Activity context, String[] itemname, String[] linkName, Integer[] imgid) {
+    public CustomListAdapter(Activity context, String[] itemname, String[] linkName, ArrayList<String> imgArray, String[] publishers) {
         super(context, R.layout.recipe_view, itemname);
-        // TODO Auto-generated constructor stub
-
         this.context=context;
         this.itemname=itemname;
         this.linkName=linkName;
-        this.imgid=imgid;
+        this.imgArray=imgArray;
+        this.publishers=publishers;
     }
 
     public View getView(int position,View view,ViewGroup parent) {
@@ -30,13 +34,13 @@ public class CustomListAdapter extends ArrayAdapter<String> {
         View rowView=inflater.inflate(R.layout.recipe_view, null,true);
 
         TextView txtTitle = (TextView) rowView.findViewById(R.id.Itemname);
-        ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
         TextView extratxt = (TextView) rowView.findViewById(R.id.linkName);
+        ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
 
+        Picasso.get().load(imgArray.get(position)).into(imageView);
         txtTitle.setText(itemname[position]);
-        imageView.setImageResource(imgid[position]);
-        extratxt.setText(linkName[position]);
-        return rowView;
+        extratxt.setText(publishers[position]);
 
+        return rowView;
     };
 }

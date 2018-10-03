@@ -3,7 +3,6 @@ package com.example.jimbo.recipeapp;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,7 +10,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -37,10 +35,12 @@ public class MainActivity extends AppCompatActivity implements ImageChanger{
     ArrayList<String> titleList = new ArrayList<String>();
     ArrayList<String> imageUrlList = new ArrayList<String>();
     ArrayList<String> recipeUrlList = new ArrayList<String>();
+    ArrayList<String> publisherList = new ArrayList<String>();
 
     String TAG_TITLE = "title";
     String TAG_IMAGE_RUL = "image_url";
     String TAG_RECIPE_URL = "source_url";
+    String TAG_PUBLISHER = "publisher";
 
     //Using an api called food2fork https://www.food2fork.com/about/api
     final private String API_KEY = "fd22eec9b203cd2d912c40c118c5cc49";
@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements ImageChanger{
         if(!editText.getText().toString().equals("")) {
             String url = "https://www.food2fork.com/api/search?key=" + API_KEY + "&q=" + editText.getText().toString();
             new JsonTask().execute(url);
+        } else {
+            infoText.setText("You have to search for something!");
         }
     }
 
@@ -82,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements ImageChanger{
         try {
             JSONObject jObject = new JSONObject(result);
             String countOfRecipes = jObject.getString("count");
-            Log.d("recipes", countOfRecipes);
             JSONArray jArray = jObject.getJSONArray("recipes");
 
             // looping through All objects.
@@ -93,14 +94,17 @@ public class MainActivity extends AppCompatActivity implements ImageChanger{
                 String title = c.getString(TAG_TITLE);
                 String imageUrl = c.getString(TAG_IMAGE_RUL);
                 String recipeUrl = c.getString(TAG_RECIPE_URL);
+                String publisher = c.getString(TAG_PUBLISHER);
 
                 Log.d("title", title);
                 Log.d("imageUrl", imageUrl);
                 Log.d("recipeUrl", recipeUrl);
+                Log.d("publisher", publisher);
 
                 titleList.add(title);
                 imageUrlList.add(imageUrl);
                 recipeUrlList.add(recipeUrl);
+                publisherList.add(publisher);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -110,7 +114,13 @@ public class MainActivity extends AppCompatActivity implements ImageChanger{
         in.putExtra("titleList", titleList);
         in.putExtra("imageUrlList", imageUrlList);
         in.putExtra("recipeUrlList", recipeUrlList);
+        in.putExtra("publisherList", publisherList);
         startActivity(in);
+
+        titleList.clear();
+        imageUrlList.clear();
+        recipeUrlList.clear();
+        publisherList.clear();
     }
 
     private class JsonTask extends AsyncTask<String, String, String> {
@@ -119,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements ImageChanger{
             super.onPreExecute();
 
             pd = new ProgressDialog(MainActivity.this);
-            pd.setMessage("Fetching recipe...");
+            pd.setMessage("Fetching recipes...");
             pd.setCancelable(false);
             pd.show();
         }
@@ -172,9 +182,24 @@ public class MainActivity extends AppCompatActivity implements ImageChanger{
             if (pd.isShowing()){
                 pd.dismiss();
             }
-            //infoText.setText(result);
+
             editText.setText("");
-            proceedToRecipes(result);
+            infoText.setText("");
+
+            String count = "0";
+            try {
+                JSONObject jObject = new JSONObject(result);
+                count = jObject.getString("count");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            int countOfRecipes = Integer.parseInt(count);
+            if(countOfRecipes > 0) {
+                proceedToRecipes(result);
+            }else {
+                infoText.setText("Could not find any recipes!");
+            }
         }
     }
 }
