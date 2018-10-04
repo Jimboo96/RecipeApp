@@ -43,7 +43,8 @@ public class MainActivity extends AppCompatActivity implements ImageChanger{
     String TAG_PUBLISHER = "publisher";
 
     //Using an api called food2fork https://www.food2fork.com/about/api
-    final private String API_KEY = "fd22eec9b203cd2d912c40c118c5cc49";
+    //final private String API_KEY = "fd22eec9b203cd2d912c40c118c5cc49";
+    final private String API_KEY = "2a08c34bf553d1973bb1072843d799d4";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
